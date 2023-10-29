@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33815.320
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UltraSpeedRun", "UltraSpeedRun\UltraSpeedRun.csproj", "{FC2C8AAD-9E90-42BC-B2B1-8CE764817B1D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6ABBEDE0-70E0-46CA-9DD6-053087109710}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC2C8AAD-9E90-42BC-B2B1-8CE764817B1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC2C8AAD-9E90-42BC-B2B1-8CE764817B1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC2C8AAD-9E90-42BC-B2B1-8CE764817B1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC2C8AAD-9E90-42BC-B2B1-8CE764817B1D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6BB4307B-6F4E-4DA6-8C4E-743283DA20B2}
+	EndGlobalSection
+EndGlobal

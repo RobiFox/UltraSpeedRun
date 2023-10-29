@@ -1,0 +1,6 @@
+.idea/
+*.user
+.vs
+Libraries/
+UltraSpeedRun/obj/
+UltraSpeedRun/bin/
