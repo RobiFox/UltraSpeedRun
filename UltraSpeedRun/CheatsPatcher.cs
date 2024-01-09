@@ -6,7 +6,6 @@ using UnityEngine;
 public class CheatsPatcher {
     [HarmonyPostfix]
     public static void Postfix(CheatsManager __instance) {
-        Debug.Log("Added cool cheat Added cool cheat Added cool cheat Added cool cheat Added cool cheat Added cool cheat Added cool cheat Added cool cheat Added cool cheat Added cool cheat Added cool cheat ");
         __instance.RebuildIcons();
         
         Dictionary<string, List<ICheat>> registeredCheats = new Dictionary<string, List<ICheat>> { { "speedrun", new List<ICheat>() } };

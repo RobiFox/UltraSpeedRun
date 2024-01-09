@@ -35,7 +35,8 @@ public class ShowZoneCheats : ICheat {
             obj.gameObject.layer = 0;
             if(obj.TryGetComponent<MeshRenderer>(out MeshRenderer renderer)) {
                 renderer.enabled = true;
-                if(renderer.material.shader.name != theMaterial.shader.name) renderer.material = theMaterial;
+                Debug.Log(theMaterial.name);
+                renderer.material = theMaterial;
             }
         }
     }
