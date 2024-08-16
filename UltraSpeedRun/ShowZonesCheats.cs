@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class ShowZoneCheats : ICheat {
     private bool _active = false;
@@ -32,16 +33,16 @@ public class ShowZoneCheats : ICheat {
 
     public void Enable() {
         _active = true;
-        PlayerActivator activator = SpeedRunMod.FindObjectOfType<PlayerActivator>();
+        PlayerActivator activator = Resources.FindObjectsOfTypeAll<PlayerActivator>()[0];
         theMaterial = activator.GetComponent<MeshRenderer>().material;
-        theMesh = activator.GetComponent<MeshFilter>().mesh;
         SetObjectsVisible<ObjectActivator>();
         SetObjectsVisible<ActivateArena>();
         SetObjectsVisible<DoorController>();
+        SetObjectsVisible<OutOfBounds>();
+        SetObjectsVisible<DeathZone>(true);
     }
 
     private Material theMaterial;
-    private Mesh theMesh;
     
     private Dictionary<Type, Color> _colors = new Dictionary<Type, Color>();
     private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
@@ -49,24 +50,46 @@ public class ShowZoneCheats : ICheat {
     public ShowZoneCheats() {
         _colors.Add(typeof(ActivateArena), new Color(0.23f, 0.5f, 0.2f, 0.25f));
         _colors.Add(typeof(DoorController), new Color(0.2f, 0.2f, 0.5f, 0.25f));
+        _colors.Add(typeof(DeathZone), new Color(0.7f, 0.2f, 0.2f, 0.25f));
     }
     
-    public void SetObjectsVisible<T>() where T : MonoBehaviour {
-        foreach(var obj in Resources.FindObjectsOfTypeAll<T>()) {
-            obj.gameObject.layer = 0;
-            if(obj.TryGetComponent<MeshRenderer>(out MeshRenderer renderer)) {
-                MakeVisible<T>(renderer);
-            } else {
-                // IDK i will fix it later
-                MeshRenderer meshRenderer = obj.gameObject.AddComponent<MeshRenderer>();
-                MeshFilter meshFilter;
-                if (!obj.gameObject.TryGetComponent<MeshFilter>(out meshFilter)) {
-                    meshFilter = obj.gameObject.AddComponent<MeshFilter>();
+    public void SetObjectsVisible<T>(bool includeChildren = false) where T : MonoBehaviour {
+        foreach (T obj in Resources.FindObjectsOfTypeAll<T>()) {
+            SetObjectsVisibleGameObject<T>(obj.gameObject);
+            if (includeChildren) {
+                foreach (Transform child in obj.transform) {
+                    SetObjectsVisibleGameObject<T>(child.gameObject);
                 }
-                meshFilter.mesh = theMesh;
-                MakeVisible<T>(meshRenderer);
             }
         }
+    }
+    
+    public void SetObjectsVisibleGameObject<T>(GameObject obj) where T : MonoBehaviour {
+        obj.gameObject.layer = 0;
+        if(obj.TryGetComponent<MeshRenderer>(out MeshRenderer renderer)) {
+            MakeVisible<T>(renderer);
+        } else {
+            if (obj.GetComponent<Collider>() == null) return;
+            if (!obj.TryGetComponent<BoxCollider>(out BoxCollider boxCollider)) return;
+            MeshRenderer meshRenderer = obj.gameObject.AddComponent<MeshRenderer>();
+            MeshFilter meshFilter;
+            if (!obj.gameObject.TryGetComponent<MeshFilter>(out meshFilter)) {
+                meshFilter = obj.gameObject.AddComponent<MeshFilter>();
+            }
+            GameObject tempCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Mesh cubeMesh = tempCube.GetComponent<MeshFilter>().sharedMesh;
+            Object.Destroy(tempCube);
+            Mesh scaledMesh = Object.Instantiate(cubeMesh);
+            Vector3[] vertices = scaledMesh.vertices;
+            for (int i = 0; i < vertices.Length; i++) {
+                vertices[i] = Vector3.Scale(vertices[i], boxCollider.size);
+            }
+            scaledMesh.vertices = vertices;
+            scaledMesh.RecalculateBounds();
+            meshFilter.mesh = cubeMesh;
+            MakeVisible<T>(meshRenderer);
+        }
+        
     }
 
     public void MakeVisible<T>(MeshRenderer renderer) where T : MonoBehaviour {
@@ -75,6 +98,7 @@ public class ShowZoneCheats : ICheat {
         if (_colors.ContainsKey(typeof(T))) {
             //renderer.material.color = _colors[typeof(T)];
             renderer.material.SetColor(EmissionColor, _colors[typeof(T)]);
+            renderer.material.color = _colors[typeof(T)];
         }
         if (!objectsMadeVisible.Contains(renderer)) objectsMadeVisible.Add(renderer);
     }
