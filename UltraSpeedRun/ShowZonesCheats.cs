@@ -33,8 +33,13 @@ public class ShowZoneCheats : ICheat {
 
     public void Enable() {
         _active = true;
-        PlayerActivator activator = Resources.FindObjectsOfTypeAll<PlayerActivator>()[0];
-        theMaterial = activator.GetComponent<MeshRenderer>().material;
+        foreach (PlayerActivator pa in Resources.FindObjectsOfTypeAll<PlayerActivator>()) {
+            MeshRenderer renderer = pa.GetComponent<MeshRenderer>();
+            if (renderer != null && renderer.material != null && renderer.material.name.Contains("Trigger")) {
+                theMaterial = renderer.material;
+                break;
+            }
+        }
         SetObjectsVisible<ObjectActivator>();
         SetObjectsVisible<ActivateArena>();
         SetObjectsVisible<DoorController>();
