@@ -72,6 +72,7 @@ public class ShowZoneCheats : ICheat {
         SetObjectsVisible<DoorController>();
         SetObjectsVisible<OutOfBounds>();
         SetObjectsVisible<DeathZone>(true);
+        SetObjectsVisible<CheckPoint>(true, false);
     }
 
     private Material theMaterial = null;
@@ -90,12 +91,13 @@ public class ShowZoneCheats : ICheat {
         _colors.Add(typeof(ActivateArena), new Color(0.23f, 0.5f, 0.2f, 1f));
         _colors.Add(typeof(DoorController), new Color(0.2f, 0.2f, 0.5f,15f));
         _colors.Add(typeof(DeathZone), new Color(0.7f, 0.2f, 0.2f, 1f));
-        _colors.Add(typeof(ObjectActivator), new Color(0.7f, 0.4f, 0.7f, 1f));
+        _colors.Add(typeof(ObjectActivator), new Color(0.4f, 0.7f, 0.7f, 1f));
+        _colors.Add(typeof(CheckPoint), new Color(0.7f, 0.4f, 0.7f, 1f));
     }
     
-    public void SetObjectsVisible<T>(bool includeChildren = false) where T : MonoBehaviour {
+    public void SetObjectsVisible<T>(bool includeChildren = false, bool includeParent = true) where T : MonoBehaviour {
         foreach (T obj in Resources.FindObjectsOfTypeAll<T>()) {
-            SetObjectsVisibleGameObject<T>(obj.gameObject);
+            if(includeParent) SetObjectsVisibleGameObject<T>(obj.gameObject);
             if (includeChildren) {
                 foreach (Transform child in obj.transform) {
                     SetObjectsVisibleGameObject<T>(child.gameObject);
@@ -106,10 +108,10 @@ public class ShowZoneCheats : ICheat {
     
     public void SetObjectsVisibleGameObject<T>(GameObject obj) where T : MonoBehaviour {
         obj.gameObject.layer = 0;
+        if (obj.GetComponent<Collider>() == null) return;
         if(obj.TryGetComponent<MeshRenderer>(out MeshRenderer renderer)) {
             MakeVisible<T>(renderer);
         } else {
-            if (obj.GetComponent<Collider>() == null) return;
             if (!obj.TryGetComponent<BoxCollider>(out BoxCollider boxCollider)) return;
             MeshRenderer meshRenderer = obj.gameObject.AddComponent<MeshRenderer>();
             MeshFilter meshFilter;
