@@ -7,7 +7,7 @@ using UnityEngine.PlayerLoop;
 public class SpeedRunMod : BaseUnityPlugin {
     public const string pluginGuid = "robi.uk.speedrun";
     public const string pluginName = "Speedrun Thingy";
-    public const string pluginVersion = "1.2.1";
+    public const string pluginVersion = "1.3.0";
 
     private static Harmony _harmony;
 

@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 public class ShowZoneCheats : ICheat {
     private bool _active = false;
+
+    public IEnumerator Coroutine(CheatsManager manager) {
+        yield return null;
+    }
 
     public string LongName => "Show All Trigger Zones";
 
@@ -31,15 +36,37 @@ public class ShowZoneCheats : ICheat {
         }
     }
 
-    public void Enable() {
+    public void Enable(CheatsManager manager) {
         _active = true;
-        foreach (PlayerActivator pa in Resources.FindObjectsOfTypeAll<PlayerActivator>()) {
-            MeshRenderer renderer = pa.GetComponent<MeshRenderer>();
-            if (renderer != null && renderer.material != null && renderer.material.name.Contains("Trigger")) {
-                theMaterial = renderer.material;
-                break;
+        if (theMaterial == null) {
+            Shader shader = null; // cant do shader.find for whatever reason
+            Material mat = null;
+            foreach (PlayerActivator pa in Resources.FindObjectsOfTypeAll<PlayerActivator>()) {
+                MeshRenderer renderer = pa.GetComponent<MeshRenderer>();
+                if (renderer != null && renderer.material != null && renderer.material.name.Contains("Trigger")) {
+                    mat = renderer.material;
+                    shader = renderer.material.shader;
+                    break;
+                }
             }
+            theMaterial = new Material(shader);
+            theMaterial.SetFloat(BlendMode, 2);
+            theMaterial.SetFloat(VertexLighting, 0);
+            theMaterial.SetFloat(Opacity, 0.5f);
+            theMaterial.SetOverrideTag("RenderType", "Transparent");
+            theMaterial.SetFloat(SrcBlend, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            theMaterial.SetFloat(DstBlend, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            theMaterial.SetFloat(ZWrite, 0);
+            theMaterial.DisableKeyword("ALPHA_TEST");
+            theMaterial.EnableKeyword("TRANSPARENCY");
+            theMaterial.EnableKeyword("_FOG_ON");
+            theMaterial.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+            theMaterial.EnableKeyword("_EMISSION");
+            theMaterial.EnableKeyword("_GLITCHMODE_NONE");
+            theMaterial.EnableKeyword("_USEALBEDOASEMISSIVE_ON");
+            theMaterial.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
         }
+
         SetObjectsVisible<ObjectActivator>();
         SetObjectsVisible<ActivateArena>();
         SetObjectsVisible<DoorController>();
@@ -47,15 +74,23 @@ public class ShowZoneCheats : ICheat {
         SetObjectsVisible<DeathZone>(true);
     }
 
-    private Material theMaterial;
+    private Material theMaterial = null;
     
     private Dictionary<Type, Color> _colors = new Dictionary<Type, Color>();
     private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
+    private static readonly int Color1 = Shader.PropertyToID("_Color");
+    private static readonly int BlendMode = Shader.PropertyToID("_BlendMode");
+    private static readonly int VertexLighting = Shader.PropertyToID("_VertexLighting");
+    private static readonly int Opacity = Shader.PropertyToID("_Opacity");
+    private static readonly int SrcBlend = Shader.PropertyToID("_SrcBlend");
+    private static readonly int DstBlend = Shader.PropertyToID("_DstBlend");
+    private static readonly int ZWrite = Shader.PropertyToID("_ZWrite");
 
     public ShowZoneCheats() {
-        _colors.Add(typeof(ActivateArena), new Color(0.23f, 0.5f, 0.2f, 0.25f));
-        _colors.Add(typeof(DoorController), new Color(0.2f, 0.2f, 0.5f, 0.25f));
-        _colors.Add(typeof(DeathZone), new Color(0.7f, 0.2f, 0.2f, 0.25f));
+        _colors.Add(typeof(ActivateArena), new Color(0.23f, 0.5f, 0.2f, 1f));
+        _colors.Add(typeof(DoorController), new Color(0.2f, 0.2f, 0.5f,15f));
+        _colors.Add(typeof(DeathZone), new Color(0.7f, 0.2f, 0.2f, 1f));
+        _colors.Add(typeof(ObjectActivator), new Color(0.7f, 0.4f, 0.7f, 1f));
     }
     
     public void SetObjectsVisible<T>(bool includeChildren = false) where T : MonoBehaviour {
@@ -102,13 +137,10 @@ public class ShowZoneCheats : ICheat {
         renderer.material = theMaterial;
         if (_colors.ContainsKey(typeof(T))) {
             //renderer.material.color = _colors[typeof(T)];
-            renderer.material.SetColor(EmissionColor, _colors[typeof(T)]);
+            //renderer.material.SetColor(EmissionColor, _colors[typeof(T)]);
+            renderer.material.SetColor(Color1, _colors[typeof(T)]);
             renderer.material.color = _colors[typeof(T)];
         }
         if (!objectsMadeVisible.Contains(renderer)) objectsMadeVisible.Add(renderer);
-    }
-
-    public void Update() {
-
     }
 }
